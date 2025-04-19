@@ -1,0 +1,46 @@
+// addi x1, x0, 5          // Set x1 = 5
+00500093
+// addi x2, x0, 3          // Set x2 = 3
+00300113
+// add x3, x1, x2          // x3 = x1 + x2 = 8
+002081b3
+// sub x4, x1, x2          // x4 = x1 - x2 = 2
+40208233
+// and x5, x1, x2          // x5 = x1 & x2 = 1
+0020f2b3
+// or x6, x1, x2           // x6 = x1 | x2 = 7
+0020e333
+// slt x7, x2, x1          // x7 = (x2 < x1) ? 1 : 0 = 1
+0010a3b3
+// sw x1, 4(x0)            // Store x1 to memory address 4
+00102223
+// lw x8, 4(x0)            // Load from memory address 4 into x8
+00402403
+// slti x9, x1, 10         // x9 = (x1 < 10) ? 1 : 0 = 1
+00a0a493
+// andi x10, x1, 1         // x10 = x1 & 1 = 1
+0010f513
+// ori x11, x2, 4          // x11 = x2 | 4 = 7
+0040e593
+// beq x1, x8, 2           // Branch if x1 == x8 (should branch)
+00850163
+// nop                     // This will be skipped
+00000013
+// addi x12, x0, 15        // This will be executed after branch
+00f00613
+// bne x1, x2, 2           // Branch if x1 != x2 (should branch)
+00209163
+// nop                     // This will be skipped
+00000013
+// addi x13, x0, 20        // This will be executed after branch
+01400693
+// jal x14, 12             // Jump and link (jump ahead 3 instructions)
+00c00713
+// addi x15, x0, 25        // This will be skipped
+01900793
+// addi x16, x0, 30        // This will be skipped
+01e00813
+// addi x17, x0, 35        // This will be skipped
+02300893
+// addi x18, x0, 40        // This will be executed after jump
+02800913
