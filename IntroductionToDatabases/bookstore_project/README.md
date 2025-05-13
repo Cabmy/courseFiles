@@ -1,231 +1,194 @@
 # 书店管理系统
 
------
-## 1. 功能描述
+## 项目介绍
 
-书店管理系统是一个综合性的管理平台，旨在帮助书店高效管理日常运营。系统主要包含以下功能模块：
+这是一个基于 Flask 和现代前端技术栈构建的书店管理系统，旨在帮助书店高效管理图书库存、销售、进货和财务等核心业务流程。系统提供了友好的用户界面和完整的功能模块，适用于中小型书店的日常运营管理。
 
-### 1.1 用户管理
-- 用户登录与身份验证
-- 权限控制（普通管理员和超级管理员）
-- 用户密码修改
+## 功能设计
 
-### 1.2 图书管理
-- 图书列表展示与搜索
-- 添加、编辑和删除图书
-- 图书库存管理与调整
-- 低库存预警
-- 导出图书数据
+### 系统架构
 
-### 1.3 销售管理
-- 创建销售记录
-- 销售历史查询与筛选
-- 畅销书统计
-- 销售报表
+- **前端**：HTML5, CSS3, JavaScript, Bootstrap 5
+- **后端**：Python Flask RESTful API
+- **数据库**：PostgreSQL
 
-### 1.4 采购管理
-- 创建采购订单
-- 采购订单管理（查看、入库、取消）
-- 采购历史查询
-- 采购状态跟踪（未付款、已付款、已退货、部分入库）
+### 核心功能模块
 
-### 1.5 财务管理
-- 财务概览（收入、支出、利润统计）
-- 财务记录查询
-- 财务趋势图表
-- 财务报表导出打印
+1. **图书管理**
+   - **图书信息的增删改查**：完整管理图书的各项信息，包括ISBN、书名、作者、出版社、零售价、库存等
+   - **图书库存管理**：实时跟踪每本书的库存状况，支持库存调整
+   - **库存预警功能**：当图书库存低于阈值时自动发出预警，便于及时补货
+   - **图书搜索**：支持通过书名、作者、ISBN等多维度搜索图书
 
-### 1.6 仪表盘
-- 销售额实时统计
-- 库存预警显示
-- 销售趋势图表
-- 最近销售和采购记录
+2. **销售管理**
+   - **销售录入**：便捷的图书销售操作界面，支持选择图书、输入数量和价格
+   - **销售记录查询**：支持按日期范围查询销售记录，清晰记录每笔交易
+   - **销售统计分析**：提供图书销售排行、销售额统计等分析功能
+   - **销售员业绩查询**：统计每位销售员的销售单数、销售数量和销售金额
 
------
-## 2. 设计思路
+3. **进货管理**
+   - **进货单创建与管理**：创建和管理进货单，支持添加已有图书或新书
+   - **新书入库操作**：将进货的新书添加到库存系统，设置零售价格
+   - **进货状态追踪**：清晰记录进货单的状态（未付款、已付款、已取消）
+   - **进货记录查询与筛选**：提供多种筛选条件，便于查找历史进货记录
+   - **快速进货**：从库存预警直接进入进货流程，提升补货效率
 
-### 2.1 系统架构
-本系统采用前后端分离的设计模式，基于Flask框架开发后端API，前端使用Bootstrap框架构建用户界面，通过RESTful API进行数据交互。
+4. **财务管理**
+   - **财务概览**：总收入、总支出、总利润的直观展示
+   - **财务记录查询**：按时间、类型等筛选查询所有财务记录
+   - **月度财务统计**：按月统计收入、支出、利润，提供表格和图表双重展示
+   - **销售利润分析**：分析各类图书的销售利润率、单本利润和总利润
+   - **环比增长分析**：计算本月与上月的利润环比增长情况
 
-### 2.2 数据流设计
-- **图书流程**：入库（采购）→ 库存管理 → 销售 → 库存更新
-- **财务流程**：销售/采购行为 → 生成财务记录 → 财务汇总 → 财务报表
-- **用户授权流程**：登录验证 → JWT令牌生成 → 请求鉴权
+5. **用户管理**（超级管理员专属）
+   - **用户账号管理**：创建、编辑、删除用户账号
+   - **角色权限控制**：分配用户角色（普通管理员或超级管理员）
+   - **员工信息管理**：维护员工的姓名、工号、性别、年龄等基本信息
+   - **密码管理**：重置用户密码，确保账号安全
 
-### 2.3 安全设计
-- 使用JWT（JSON Web Token）进行身份验证
-- 密码加密存储（MD5加密）
-- API访问控制，根据用户角色限制权限
+6. **首页/控制台**
+   - **库存总览**：总图书种类和库存预警图书数量
+   - **销售概况**：今日销量和销售额的实时显示
+   - **财务概况**：本月收入和支出的快速查看
+   - **销售排行榜**：近期图书销售排行
+   - **库存预警列表**：展示需要补货的图书及快速进货入口
 
-### 2.4 界面设计
-- 响应式布局，支持不同设备访问
-- 直观的导航和操作流程
-- 数据可视化展示（图表）
+### 数据库设计
 
------
-## 3. 数据表设计
+系统主要包含以下数据表：
+- `user` - 用户信息表
+- `book` - 图书信息表
+- `sale_record` - 销售记录表
+- `purchase_order` - 进货单表
+- `purchase_detail` - 进货单明细表
+- `financial_record` - 财务记录表
 
-### 3.1 用户表（user）
-```sql
-CREATE TABLE user (
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(32) NOT NULL, -- MD5加密的密码
-    real_name VARCHAR(255) NOT NULL,
-    employee_id VARCHAR(20) NOT NULL,
-    gender ENUM('男', '女') NOT NULL,
-    age INT CHECK (age > 0),
-    role ENUM('超级管理员', '普通管理员') NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
+同时包含多个存储过程和视图，用于处理复杂业务逻辑和数据统计。
 
-### 3.2 图书表（book）
-```sql
-CREATE TABLE book (
-    book_id INT AUTO_INCREMENT PRIMARY KEY,
-    isbn VARCHAR(20) NOT NULL UNIQUE,
-    title VARCHAR(200) NOT NULL,
-    author VARCHAR(100) NOT NULL,
-    publisher VARCHAR(100) NOT NULL,
-    retail_price DECIMAL(10, 2) NOT NULL,
-    stock INT NOT NULL DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-```
+## 项目部署和使用
 
-### 3.3 采购订单表（purchase_order）
-```sql
-CREATE TABLE purchase_order (
-    order_id INT AUTO_INCREMENT PRIMARY KEY,
-    creator_id INT NOT NULL,
-    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('未付款', '已付款', '已退货') NOT NULL DEFAULT '未付款',
-    total_amount DECIMAL(12, 2) NOT NULL DEFAULT 0,
-    remark VARCHAR(500),
-    FOREIGN KEY (creator_id) REFERENCES user(user_id)
-);
-```
+### 环境要求
 
-### 3.4 采购明细表（purchase_detail）
-```sql
-CREATE TABLE purchase_detail (
-    detail_id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT NOT NULL,
-    book_id INT,
-    isbn VARCHAR(20),
-    title VARCHAR(200),
-    author VARCHAR(100),
-    publisher VARCHAR(100),
-    quantity INT NOT NULL,
-    purchase_price DECIMAL(10, 2) NOT NULL,
-    is_new_book BOOLEAN NOT NULL DEFAULT FALSE,
-    FOREIGN KEY (order_id) REFERENCES purchase_order(order_id),
-    FOREIGN KEY (book_id) REFERENCES book(book_id)
-);
-```
-
-### 3.5 销售记录表（sale_record）
-```sql
-CREATE TABLE sale_record (
-    sale_id INT AUTO_INCREMENT PRIMARY KEY,
-    book_id INT NOT NULL,
-    quantity INT NOT NULL,
-    sale_price DECIMAL(10, 2) NOT NULL,
-    sale_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    seller_id INT NOT NULL,
-    remark VARCHAR(500),
-    FOREIGN KEY (book_id) REFERENCES book(book_id),
-    FOREIGN KEY (seller_id) REFERENCES user(user_id)
-);
-```
-
-### 3.6 财务记录表（financial_record）
-```sql
-CREATE TABLE financial_record (
-    record_id INT AUTO_INCREMENT PRIMARY KEY,
-    type ENUM('收入', '支出') NOT NULL,
-    amount DECIMAL(12, 2) NOT NULL,
-    source_type ENUM('进货', '销售') NOT NULL,
-    source_id INT NOT NULL,
-    record_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    operator_id INT NOT NULL,
-    description VARCHAR(500),
-    FOREIGN KEY (operator_id) REFERENCES user(user_id)
-);
-```
-
-### 3.7 财务汇总表（financial_summary）
-```sql
-CREATE TABLE financial_summary (
-    summary_id INT AUTO_INCREMENT PRIMARY KEY,
-    summary_date DATE NOT NULL UNIQUE,
-    total_income DECIMAL(12, 2) NOT NULL DEFAULT 0,
-    total_expense DECIMAL(12, 2) NOT NULL DEFAULT 0,
-    sale_income DECIMAL(12, 2) NOT NULL DEFAULT 0,
-    purchase_expense DECIMAL(12, 2) NOT NULL DEFAULT 0,
-    other_income DECIMAL(12, 2) NOT NULL DEFAULT 0,
-    other_expense DECIMAL(12, 2) NOT NULL DEFAULT 0,
-    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-```
-
-### 3.8 ER设计图
-![alt text](ER设计图.png)
-
------
-## 4. 运行指南
-
-### 4.1 环境要求
 - Python 3.8+
-- MySQL 5.7+
-- Web浏览器（建议使用Chrome或Firefox最新版本）
+- PostgreSQL 12+
+- Node.js 14+ (可选，用于开发)
 
-### 4.2 安装步骤
+### 后端部署
 
-1. 克隆项目代码：
+1. **安装依赖**
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   ```
+
+2. **初始化数据库**
 ```bash
-git clone https://github.com/yourusername/bookstore_project.git
-cd bookstore_project
+   # 登录PostgreSQL
+   psql -U postgres
+   
+   # 创建数据库
+   CREATE DATABASE bookstore_management WITH ENCODING='UTF-8';
+   
+   # 退出psql
+   \q
+   
+   # 设置客户端编码为UTF-8（Windows系统）
+   set PGCLIENTENCODING=UTF-8
+   
+   # 导入数据库初始化脚本
+   psql -U postgres -d bookstore_management -f db/init_database.sql
+   psql -U postgres -d bookstore_management -f db/create_views.sql
+   psql -U postgres -d bookstore_management -f db/create_functions.sql
+   ```
+
+3. **启动**
+   ```bash
+   python run.py
+   ```
+
+### 系统使用
+
+1. **初始登录**
+   - 默认超级管理员账号：admin
+   - 默认密码：admin123
+
+2. **基本操作流程**
+   - 管理图书：添加、编辑、删除图书信息
+   - 处理销售：记录图书销售情况
+   - 管理进货：创建进货单，处理新书入库
+   - 查看财务：分析财务状况，查看收支情况
+   - 管理用户：添加新用户，设置权限
+
+## 系统特性
+
+1. **权限控制**
+   - 超级管理员：拥有所有权限，包括用户管理
+   - 普通管理员：拥有除用户管理外的所有权限
+
+2. **智能库存管理**
+   - 自动库存预警
+   - 快速进货操作
+
+3. **实时数据分析**
+   - 销售业绩统计
+   - 财务状况分析
+   - 利润率计算
+
+4. **数据完整性保护**
+   - 事务管理
+   - 数据验证
+   - 关系完整性约束
+
+## 开发与扩展
+
+### 项目结构
+
+```
+backend/
+    app.py                  # 应用入口点
+    models.py               # 数据模型定义
+    requirements.txt        # 依赖管理
+    routes/                 # API路由模块
+        book_routes.py      # 图书管理路由
+        finance_routes.py   # 财务管理路由
+        purchase_routes.py  # 进货管理路由
+        sale_routes.py      # 销售管理路由
+        user_routes.py      # 用户管理路由
+db/
+    create_functions.sql    # 存储过程和函数
+    create_views.sql        # 视图定义
+    init_database.sql       # 数据库初始化脚本
+frontend/
+    index.html              # 主HTML文件
+    css/                    # 样式文件
+    js/                     # JavaScript模块
+        api.js              # API客户端
+        auth.js             # 认证模块
+        config.js           # 配置文件
+        finance-management.js  # 财务管理模块
+        purchase-management.js # 进货管理模块
+        sale-management.js     # 销售管理模块
+        script.js           # 主脚本文件
+        user-management.js  # 用户管理模块
 ```
 
-2. 创建并激活虚拟环境：
-```bash
-python -m venv venv
-source venv/bin/activate  # 在Windows上使用 venv\Scripts\activate
-```
+### 业务流程
 
-3. 安装依赖：
-```bash
-pip install -r requirements.txt
-```
+1. **图书销售流程**
+   - 在销售管理页面选择图书
+   - 输入销售数量和价格
+   - 提交销售记录
+   - 系统自动更新库存和财务记录
 
-4. 配置数据库：
-   - 创建MySQL数据库
-   - 修改 config.py 中的数据库连接信息
+2. **进货流程**
+   - 创建新进货单
+   - 添加已有图书或新书明细
+   - 保存进货单
+   - 付款确认，系统更新库存和财务记录
+   - 对于新书，设置零售价并添加到库存
 
-5. 初始化数据库：
-```bash
-# 创建数据表和视图
-mysql -u username -p database_name < db/schema.sql
-mysql -u username -p database_name < db/views.sql
-# 创建存储过程和函数
-mysql -u username -p database_name < db/functions.sql
-# 创建索引
-mysql -u username -p database_name < db/indexes.sql
-```
-
-### 4.3 运行应用
-
-1. 启动Flask应用：
-```bash
-python run.py
-```
-
-2. 访问应用：
-   - 打开浏览器访问 `http://localhost:5000`
-   - 使用默认超级管理员账号登录：
-     - 用户名：`admin`
-     - 密码：`admin123`
+3. **财务统计流程**
+   - 系统自动记录所有销售和进货的财务影响
+   - 在财务管理页面查看统计数据
+   - 生成月度财务报表
+   - 分析销售利润情况

@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>书店管理系统</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- 添加Chart.js库 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 侧边导航栏 -->
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                <div class="position-sticky">
+                    <div class="text-center p-3">
+                        <h4>书店管理系统</h4>
+                        <p id="current-user">未登录</p>
+                    </div>
+                    <ul class="nav flex-column" id="nav-menu">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" data-page="dashboard">
+                                <i class="bi bi-house"></i> 首页
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-page="book-management">
+                                <i class="bi bi-book"></i> 图书管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-page="purchase-management">
+                                <i class="bi bi-cart-plus"></i> 进货管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-page="sale-management">
+                                <i class="bi bi-cart-check"></i> 销售管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-page="finance-management">
+                                <i class="bi bi-cash"></i> 财务管理
+                            </a>
+                        </li>
+                        <li class="nav-item admin-only">
+                            <a class="nav-link" href="#" data-page="user-management">
+                                <i class="bi bi-people"></i> 用户管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" id="logout-btn">
+                                <i class="bi bi-box-arrow-right"></i> 退出登录
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- 主要内容区域 -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <!-- 登录界面 -->
+                <div id="login-page" class="container mt-5">
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="text-center">书店管理系统</h3>
+                                </div>
+                                <div class="card-body">
+                                    <form id="login-form">
+                                        <div class="mb-3">
+                                            <label for="username" class="form-label">用户名</label>
+                                            <input type="text" class="form-control" id="username" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="password" class="form-label">密码</label>
+                                            <input type="password" class="form-control" id="password" required>
+                                        </div>
+                                        <div class="d-grid">
+                                            <button type="submit" class="btn btn-primary">登录</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 仪表盘/首页 -->
+                <div id="dashboard" class="content-page">
+                    <div
+                        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">控制台</h1>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">库存总览</h5>
+                                    <p class="card-text">总图书种类：<span id="total-books">0</span></p>
+                                    <p class="card-text">库存预警图书：<span id="low-stock-books">0</span></p>
+                                    <a href="#" class="btn btn-sm btn-primary" data-page="book-management">查看详情</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">销售概况</h5>
+                                    <p class="card-text">今日销量：<span id="today-sales">0</span></p>
+                                    <p class="card-text">今日销售额：<span id="today-revenue">¥0.00</span></p>
+                                    <a href="#" class="btn btn-sm btn-primary" data-page="sale-management">查看详情</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">财务概况</h5>
+                                    <p class="card-text">本月收入：<span id="monthly-income">¥0.00</span></p>
+                                    <p class="card-text">本月支出：<span id="monthly-expense">¥0.00</span></p>
+                                    <a href="#" class="btn btn-sm btn-primary" data-page="finance-management">查看详情</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">近期销售图书排行</h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>书名</th>
+                                                    <th>销量</th>
+                                                    <th>销售额</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="sales-ranking">
+                                                <!-- 销售排行数据 -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">库存预警</h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>书名</th>
+                                                    <th>剩余库存</th>
+                                                    <th>操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="low-stock-list">
+                                                <!-- 库存预警数据 -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 图书管理页面 -->
+                <div id="book-management" class="content-page">
+                    <div
+                        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">图书管理</h1>
+                        <button class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#addBookModal">添加图书</button>
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="book-search" placeholder="搜索图书(书名、作者、ISBN)">
+                            <button class="btn btn-outline-secondary" type="button" id="search-book-btn">搜索</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>ISBN</th>
+                                    <th>书名</th>
+                                    <th>作者</th>
+                                    <th>出版社</th>
+                                    <th>零售价</th>
+                                    <th>库存</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="books-table-body">
+                                <!-- 图书数据 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 销售管理页面 -->
+                <div id="sale-management" class="content-page">
+                    <div
+                        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">销售管理</h1>
+                        <button class="btn btn-primary" onclick="SaleManagement.openSaleDialog()">销售图书</button>
+                    </div>
+
+                    <!-- 销售记录筛选 -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="sale-start-date" class="form-label">开始日期</label>
+                                    <input type="date" class="form-control" id="sale-start-date">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="sale-end-date" class="form-label">结束日期</label>
+                                    <input type="date" class="form-control" id="sale-end-date">
+                                </div>
+                                <div class="col-md-4 mb-3 d-flex align-items-end">
+                                    <button class="btn btn-primary w-100" id="search-sale-btn">搜索</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 销售记录表格 -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">销售记录</h5>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>图书名称</th>
+                                            <th>数量</th>
+                                            <th>单价</th>
+                                            <th>总金额</th>
+                                            <th>销售时间</th>
+                                            <th>销售员</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sales-table-body">
+                                        <!-- 销售记录数据 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 销售统计部分 -->
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">销售统计</h5>
+                                    <button class="btn btn-sm btn-outline-primary mb-3"
+                                        onclick="SaleManagement.loadSalesStatistics()">
+                                        加载销售统计
+                                    </button>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>书名</th>
+                                                    <th>作者</th>
+                                                    <th>ISBN</th>
+                                                    <th>销量</th>
+                                                    <th>销售额</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="sales-statistics-body">
+                                                <!-- 销售统计数据 -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">员工销售业绩</h5>
+                                    <button class="btn btn-sm btn-outline-primary mb-3"
+                                        onclick="SaleManagement.loadSalesPerformance()">
+                                        加载销售业绩
+                                    </button>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>员工姓名</th>
+                                                    <th>销售单数</th>
+                                                    <th>销售数量</th>
+                                                    <th>销售金额</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="sales-performance-body">
+                                                <!-- 销售业绩数据 -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 进货管理页面 -->
+                <div id="purchase-management" class="content-page">
+                    <div
+                        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">进货管理</h1>
+                        <button class="btn btn-primary" id="create-purchase-btn">创建进货单</button>
+                    </div>
+
+                    <!-- 进货单筛选 -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="purchase-status-filter" class="form-label">状态筛选</label>
+                                    <select class="form-select" id="purchase-status-filter">
+                                        <option value="">全部状态</option>
+                                        <option value="未付款">未付款</option>
+                                        <option value="已付款">已付款</option>
+                                        <option value="已取消">已取消</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 进货单列表 -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">进货单列表</h5>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>订单ID</th>
+                                            <th>创建者</th>
+                                            <th>创建时间</th>
+                                            <th>状态</th>
+                                            <th>总金额</th>
+                                            <th>商品数量</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="purchase-orders-table-body">
+                                        <!-- 进货单数据 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 财务管理页面 -->
+                <div id="finance-management" class="content-page">
+                    <div
+                        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">财务管理</h1>
+                    </div>
+
+                    <!-- 财务概览 -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">财务概览</h5>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="card bg-light">
+                                                <div class="card-body">
+                                                    <h6 class="card-subtitle mb-2 text-muted">总收入</h6>
+                                                    <p class="card-text fs-4" id="total-income">¥0.00</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card bg-light">
+                                                <div class="card-body">
+                                                    <h6 class="card-subtitle mb-2 text-muted">总支出</h6>
+                                                    <p class="card-text fs-4" id="total-expense">¥0.00</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card bg-light">
+                                                <div class="card-body">
+                                                    <h6 class="card-subtitle mb-2 text-muted">总利润</h6>
+                                                    <p class="card-text fs-4" id="total-profit">¥0.00</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mt-3">
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h6 class="card-subtitle mb-2 text-muted" id="current-month-label">
+                                                        本月</h6>
+                                                    <div class="row">
+                                                        <div class="col-4">
+                                                            <small>收入</small>
+                                                            <p id="current-month-income">¥0.00</p>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <small>支出</small>
+                                                            <p id="current-month-expense">¥0.00</p>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <small>利润</small>
+                                                            <p id="current-month-profit">¥0.00</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h6 class="card-subtitle mb-2 text-muted" id="last-month-label">上月
+                                                    </h6>
+                                                    <div class="row">
+                                                        <div class="col-4">
+                                                            <small>收入</small>
+                                                            <p id="last-month-income">¥0.00</p>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <small>支出</small>
+                                                            <p id="last-month-expense">¥0.00</p>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <small>利润</small>
+                                                            <p id="last-month-profit">¥0.00</p>
+                                                            <small>环比: <span id="month-over-month">0%</span></small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 财务记录查询 -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">财务记录查询</h5>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label for="finance-start-date" class="form-label">开始日期</label>
+                                    <input type="date" class="form-control" id="finance-start-date">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="finance-end-date" class="form-label">结束日期</label>
+                                    <input type="date" class="form-control" id="finance-end-date">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="finance-type-filter" class="form-label">类型</label>
+                                    <select class="form-select" id="finance-type-filter">
+                                        <option value="">全部</option>
+                                        <option value="收入">收入</option>
+                                        <option value="支出">支出</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3 d-flex align-items-end">
+                                    <button class="btn btn-primary w-100" id="finance-search-btn">搜索</button>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive mt-3">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>类型</th>
+                                            <th>金额</th>
+                                            <th>来源类型</th>
+                                            <th>来源ID</th>
+                                            <th>记录时间</th>
+                                            <th>操作员</th>
+                                            <th>描述</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="finance-records-table-body">
+                                        <!-- 财务记录数据 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 月度财务统计 -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">月度财务统计</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <label for="year-select" class="form-label">选择年份</label>
+                                    <select class="form-select" id="year-select">
+                                        <option value="2023">2023年</option>
+                                        <option value="2024">2024年</option>
+                                        <option value="2025" selected>2025年</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>月份</th>
+                                                    <th>收入</th>
+                                                    <th>支出</th>
+                                                    <th>利润</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="monthly-statistics-body">
+                                                <!-- 月度统计数据 -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <!-- 月度图表 -->
+                                    <div id="monthly-chart" class="chart-container">
+                                        <!-- 图表将通过JavaScript生成 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 销售利润分析 -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">销售利润分析</h5>
+                            <button class="btn btn-sm btn-outline-primary mb-3"
+                                onclick="FinanceManagement.loadSalesProfit()">
+                                加载利润分析
+                            </button>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>图书名称</th>
+                                            <th>销售数量</th>
+                                            <th>平均进价</th>
+                                            <th>平均售价</th>
+                                            <th>单本利润</th>
+                                            <th>利润率</th>
+                                            <th>总利润</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sales-profit-body">
+                                        <!-- 销售利润数据 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 用户管理页面 -->
+                <div id="user-management" class="content-page">
+                    <div
+                        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">用户管理</h1>
+                        <button class="btn btn-primary" onclick="UserManagement.openCreateDialog()">添加用户</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>用户名</th>
+                                            <th>姓名</th>
+                                            <th>工号</th>
+                                            <th>性别</th>
+                                            <th>年龄</th>
+                                            <th>角色</th>
+                                            <th>创建时间</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="users-table-body">
+                                        <!-- 用户数据 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 添加图书模态框 -->
+    <div class="modal fade" id="addBookModal" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addBookModalLabel">添加图书</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-book-form">
+                        <div class="mb-3">
+                            <label for="isbn" class="form-label">ISBN</label>
+                            <input type="text" class="form-control" id="isbn" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="title" class="form-label">书名</label>
+                            <input type="text" class="form-control" id="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="author" class="form-label">作者</label>
+                            <input type="text" class="form-control" id="author" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="publisher" class="form-label">出版社</label>
+                            <input type="text" class="form-control" id="publisher" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="retail-price" class="form-label">零售价格</label>
+                            <input type="number" class="form-control" id="retail-price" step="0.01" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="stock" class="form-label">库存</label>
+                            <input type="number" class="form-control" id="stock" min="0" value="0">
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">保存</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑图书模态框 (类似添加图书，但有ID) -->
+    <div class="modal fade" id="editBookModal" tabindex="-1" aria-labelledby="editBookModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editBookModalLabel">编辑图书</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-book-form">
+                        <input type="hidden" id="edit-book-id">
+                        <div class="mb-3">
+                            <label for="edit-isbn" class="form-label">ISBN</label>
+                            <input type="text" class="form-control" id="edit-isbn" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-title" class="form-label">书名</label>
+                            <input type="text" class="form-control" id="edit-title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-author" class="form-label">作者</label>
+                            <input type="text" class="form-control" id="edit-author" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-publisher" class="form-label">出版社</label>
+                            <input type="text" class="form-control" id="edit-publisher" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-retail-price" class="form-label">零售价格</label>
+                            <input type="number" class="form-control" id="edit-retail-price" step="0.01" min="0"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-stock" class="form-label">库存</label>
+                            <input type="number" class="form-control" id="edit-stock" min="0">
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">保存修改</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加销售记录模态框 -->
+    <div class="modal fade" id="addSaleModal" tabindex="-1" aria-labelledby="addSaleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addSaleModalLabel">销售图书</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-sale-form">
+                        <div class="mb-3">
+                            <label for="sale-book-id" class="form-label">选择图书</label>
+                            <select class="form-select" id="sale-book-id" required>
+                                <!-- 图书列表将通过JavaScript动态填充 -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sale-quantity" class="form-label">销售数量</label>
+                            <input type="number" class="form-control" id="sale-quantity" min="1" value="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sale-price" class="form-label">销售单价</label>
+                            <input type="number" class="form-control" id="sale-price" step="0.01" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sale-remark" class="form-label">备注</label>
+                            <textarea class="form-control" id="sale-remark" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">销售总金额</label>
+                            <p class="form-control-static fs-5" id="sale-total">¥0.00</p>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">提交销售</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 销售详情模态框 -->
+    <div class="modal fade" id="saleDetailModal" tabindex="-1" aria-labelledby="saleDetailModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="saleDetailModalLabel">销售详情</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div id="sale-detail-content">
+                    <!-- 销售详情将通过JavaScript动态填充 -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 创建/编辑进货单模态框 -->
+    <div class="modal fade" id="purchaseOrderModal" tabindex="-1" aria-labelledby="purchaseOrderModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="purchase-modal-title">创建进货单</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="purchase-order-form">
+                        <input type="hidden" id="purchase-order-id">
+
+                        <!-- 添加明细项部分 -->
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6>添加明细项</h6>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="is-new-book">
+                                        <label class="form-check-label" for="is-new-book">新书</label>
+                                    </div>
+                                </div>
+
+                                <!-- 已有图书选择表单 -->
+                                <div id="existing-book-form">
+                                    <div class="mb-3">
+                                        <label for="existing-book-select" class="form-label">选择图书</label>
+                                        <select class="form-select" id="existing-book-select">
+                                            <!-- 图书列表将通过JavaScript动态填充 -->
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- 新书信息表单 -->
+                                <div id="new-book-form" style="display:none;">
+                                    <div class="mb-3">
+                                        <label for="new-book-isbn" class="form-label">ISBN</label>
+                                        <input type="text" class="form-control" id="new-book-isbn">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="new-book-title" class="form-label">书名</label>
+                                        <input type="text" class="form-control" id="new-book-title">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="new-book-author" class="form-label">作者</label>
+                                        <input type="text" class="form-control" id="new-book-author">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="new-book-publisher" class="form-label">出版社</label>
+                                        <input type="text" class="form-control" id="new-book-publisher">
+                                    </div>
+                                </div>
+
+                                <!-- 共用的数量和价格输入 -->
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="detail-quantity" class="form-label">数量</label>
+                                        <input type="number" class="form-control" id="detail-quantity" min="1"
+                                            value="1">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="detail-purchase-price" class="form-label">进货单价</label>
+                                        <input type="number" class="form-control" id="detail-purchase-price" step="0.01"
+                                            min="0">
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn btn-outline-primary"
+                                    id="add-detail-item-btn">添加到明细</button>
+                            </div>
+                        </div>
+
+                        <!-- 明细项列表 -->
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>类型</th>
+                                        <th>书名</th>
+                                        <th>作者</th>
+                                        <th>出版社</th>
+                                        <th>数量</th>
+                                        <th>单价</th>
+                                        <th>小计</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detail-items-body">
+                                    <!-- 明细项将通过JavaScript动态填充 -->
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="6" class="text-end"><strong>总计:</strong></td>
+                                        <td id="order-total-amount">¥0.00</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <!-- 备注 -->
+                        <div class="mb-3">
+                            <label for="purchase-remark" class="form-label">备注</label>
+                            <textarea class="form-control" id="purchase-remark" rows="2"></textarea>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">保存进货单</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 进货单详情模态框 -->
+    <div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderDetailModalLabel">进货单详情</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p><strong>订单编号:</strong> <span id="order-detail-id"></span></p>
+                            <p><strong>创建者:</strong> <span id="order-detail-creator"></span></p>
+                            <p><strong>创建时间:</strong> <span id="order-detail-time"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>订单状态:</strong> <span id="order-detail-status"></span></p>
+                            <p><strong>总金额:</strong> <span id="order-detail-amount"></span></p>
+                            <p><strong>备注:</strong> <span id="order-detail-remark"></span></p>
+                        </div>
+                    </div>
+
+                    <h6>订单明细</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>类型</th>
+                                    <th>书名</th>
+                                    <th>作者</th>
+                                    <th>出版社</th>
+                                    <th>ISBN</th>
+                                    <th>数量</th>
+                                    <th>单价</th>
+                                    <th>小计</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="order-details-table-body">
+                                <!-- 明细将通过JavaScript动态填充 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加新书到库存模态框 -->
+    <div class="modal fade" id="addToStockModal" tabindex="-1" aria-labelledby="addToStockModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addToStockModalLabel">添加新书到库存</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-to-stock-form">
+                        <input type="hidden" id="add-to-stock-detail-id">
+                        <div class="mb-3">
+                            <label for="new-book-retail-price" class="form-label">设置零售价格</label>
+                            <input type="number" class="form-control" id="new-book-retail-price" step="0.01" min="0"
+                                required>
+                            <small class="text-muted">请设置一个合理的零售价格，建议高于进货价</small>
+                        </div>
+                        <div class="d-grid">
+                            <button type="button" class="btn btn-primary" id="add-to-stock-btn">添加到库存</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新书列表模态框 -->
+    <div class="modal fade" id="newBooksModal" tabindex="-1" aria-labelledby="newBooksModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newBooksModalLabel">新书列表</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>书名</th>
+                                    <th>作者</th>
+                                    <th>出版社</th>
+                                    <th>ISBN</th>
+                                    <th>数量</th>
+                                    <th>进货价</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="new-books-table-body">
+                                <!-- 新书列表将通过JavaScript动态填充 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加用户模态框 -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addUserModalLabel">添加用户</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-user-form">
+                        <div class="mb-3">
+                            <label for="add-username" class="form-label">用户名</label>
+                            <input type="text" class="form-control" id="add-username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="add-password" class="form-label">密码</label>
+                            <input type="password" class="form-control" id="add-password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="real-name" class="form-label">姓名</label>
+                            <input type="text" class="form-control" id="real-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="employee-id" class="form-label">工号</label>
+                            <input type="text" class="form-control" id="employee-id" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="gender" class="form-label">性别</label>
+                            <select class="form-select" id="gender" required>
+                                <option value="">请选择</option>
+                                <option value="男">男</option>
+                                <option value="女">女</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="age" class="form-label">年龄</label>
+                            <input type="number" class="form-control" id="age" min="18">
+                        </div>
+                        <div class="mb-3">
+                            <label for="role" class="form-label">角色</label>
+                            <select class="form-select" id="role" required>
+                                <option value="">请选择</option>
+                                <option value="普通管理员">普通管理员</option>
+                                <option value="超级管理员">超级管理员</option>
+                            </select>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">保存</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑用户模态框 -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUserModalLabel">编辑用户</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-user-form">
+                        <input type="hidden" id="edit-user-id">
+                        <div class="mb-3">
+                            <label for="edit-username" class="form-label">用户名</label>
+                            <input type="text" class="form-control" id="edit-username" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-password" class="form-label">密码（不修改请留空）</label>
+                            <input type="password" class="form-control" id="edit-password">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-real-name" class="form-label">姓名</label>
+                            <input type="text" class="form-control" id="edit-real-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-employee-id" class="form-label">工号</label>
+                            <input type="text" class="form-control" id="edit-employee-id" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-gender" class="form-label">性别</label>
+                            <select class="form-select" id="edit-gender" required>
+                                <option value="">请选择</option>
+                                <option value="男">男</option>
+                                <option value="女">女</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-age" class="form-label">年龄</label>
+                            <input type="number" class="form-control" id="edit-age" min="18">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-role" class="form-label">角色</label>
+                            <select class="form-select" id="edit-role" required>
+                                <option value="">请选择</option>
+                                <option value="普通管理员">普通管理员</option>
+                                <option value="超级管理员">超级管理员</option>
+                            </select>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">保存修改</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/sale-management.js"></script>
+    <script src="js/purchase-management.js"></script>
+    <script src="js/finance-management.js"></script>
+    <script src="js/user-management.js"></script>
+</body>
+
+</html>

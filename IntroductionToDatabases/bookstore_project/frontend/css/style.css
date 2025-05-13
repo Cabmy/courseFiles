@@ -1,0 +1,211 @@
+/* 主样式文件 */
+
+/* 全局样式 */
+body {
+    font-family: 'Microsoft YaHei', sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* 侧边栏样式 */
+#sidebar {
+    min-height: 100vh;
+    position: fixed;
+    z-index: 100;
+    padding: 0;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-sticky {
+    position: relative;
+    top: 0;
+    height: calc(100vh - 48px);
+    padding-top: .5rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: #333;
+}
+
+.nav-link.active {
+    color: #007bff;
+}
+
+.sidebar-heading {
+    font-size: .75rem;
+    text-transform: uppercase;
+}
+
+/* 内容页面样式 */
+main {
+    padding-top: 20px;
+    min-height: 100vh;
+    margin-left: 16.66666667%;
+}
+
+@media (max-width: 768px) {
+    main {
+        margin-left: 0;
+    }
+
+    #sidebar {
+        position: static;
+        min-height: auto;
+    }
+}
+
+.content-page {
+    display: none;
+}
+
+/* 表格内操作按钮样式 */
+.action-btn {
+    margin-right: 5px;
+    padding: 0.2rem 0.5rem;
+}
+
+/* 加载状态样式 */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+}
+
+.spinner-border {
+    margin-right: 10px;
+}
+
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* 图表样式 */
+.chart-container {
+    height: 400px;
+    position: relative;
+    padding: 20px 0;
+}
+
+.chart-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    height: 300px;
+}
+
+.chart-month {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 8%;
+}
+
+.chart-month-label {
+    margin-top: 5px;
+    font-size: 0.8rem;
+}
+
+.chart-bars-container {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    justify-content: space-evenly;
+}
+
+.chart-bar {
+    width: 40%;
+    border-radius: 4px 4px 0 0;
+}
+
+.income-bar {
+    background-color: #28a745;
+}
+
+.expense-bar {
+    background-color: #dc3545;
+}
+
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin: 0 15px;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+    border-radius: 2px;
+}
+
+/* 登录页面样式 */
+#login-page {
+    padding-top: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+/* 卡片样式 */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* 表格样式 */
+.table {
+    white-space: nowrap;
+    font-size: 0.9rem;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+/* 按钮样式 */
+.btn {
+    border-radius: 0.3rem;
+}
+
+/* 表单样式 */
+.form-label {
+    font-weight: 500;
+}
+
+/* 提示信息样式 */
+.alert {
+    margin-bottom: 1rem;
+    border-radius: 0.3rem;
+}
+
+/* 响应式调整 */
+@media (max-width: 767.98px) {
+    .sidebar {
+        position: static;
+        height: auto;
+    }
+
+    main {
+        margin-top: 1rem;
+    }
+}
+
+/* 隐藏admin专属内容 */
+.admin-only {
+    display: none;
+}
