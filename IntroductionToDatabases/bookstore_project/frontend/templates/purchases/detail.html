@@ -1,0 +1,195 @@
+{% extends 'layout.html' %}
+
+{% block title %}采购订单详情 - 书店管理系统{% endblock %}
+
+{% block header %}采购订单详情{% endblock %}
+
+{% block header_buttons %}
+<div>
+    <a href="/purchases" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> 返回订单列表
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold">订单基本信息</h6>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <p><strong>订单编号:</strong> <span id="detail-order-id"></span></p>
+                <p><strong>供应商名称:</strong> <span id="detail-supplier"></span></p>
+                <p><strong>创建时间:</strong> <span id="detail-order-date"></span></p>
+                <p><strong>预计到货日期:</strong> <span id="detail-expected-date"></span></p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>状态:</strong> <span id="detail-status" class="badge"></span></p>
+                <p><strong>总金额:</strong> <span id="detail-total"></span></p>
+                <p><strong>创建人:</strong> <span id="detail-creator"></span></p>
+                <p><strong>备注:</strong> <span id="detail-notes"></span></p>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="d-flex justify-content-end mb-4">
+            <button id="detail-receive-btn" class="btn btn-success me-2" style="display: none;">
+                <i class="bi bi-box-arrow-in-down"></i> 入库
+            </button>
+            <button id="detail-cancel-btn" class="btn btn-danger me-2" style="display: none;">
+                <i class="bi bi-x-circle"></i> 取消订单
+            </button>
+            <button id="detail-print-btn" class="btn btn-outline-secondary">
+                <i class="bi bi-printer"></i> 打印
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 采购项目列表 -->
+<div class="card shadow">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold">采购项目</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ISBN</th>
+                        <th>书名</th>
+                        <th>单价</th>
+                        <th>数量</th>
+                        <th>已入库</th>
+                        <th>小计</th>
+                    </tr>
+                </thead>
+                <tbody id="detail-items">
+                    <tr>
+                        <td colspan="6" class="text-center">加载中...</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5" class="text-end fw-bold">总计:</td>
+                        <td id="items-total" class="fw-bold"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 入库Modal -->
+<div class="modal fade" id="receiveOrderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">确认入库</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="receive-form">
+                    <p>请确认每本书籍的实际入库数量：</p>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ISBN</th>
+                                    <th>书名</th>
+                                    <th>订购数量</th>
+                                    <th>入库数量</th>
+                                </tr>
+                            </thead>
+                            <tbody id="receive-items">
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+                <div class="alert alert-danger" id="receive-error" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success" id="confirm-receive">确认入库</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 取消订单Modal -->
+<div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">取消订单</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>确定要取消此采购订单吗？取消后将不能恢复。</p>
+                <div class="mb-3">
+                    <label for="cancel-reason" class="form-label">取消原因</label>
+                    <textarea class="form-control" id="cancel-reason" rows="3" required></textarea>
+                </div>
+                <div class="alert alert-danger" id="cancel-error" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">返回</button>
+                <button type="button" class="btn btn-danger" id="confirm-cancel">确认取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/purchase.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 获取订单ID
+        const urlParts = window.location.pathname.split('/');
+        const orderId = urlParts[urlParts.length - 1];
+
+        // 获取token
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        // 设置请求头
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+
+        // 加载订单详情
+        const loadOrderDetails = async () => {
+            try {
+                const response = await fetch(`/api/purchases/orders/${orderId}`, { headers });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    renderOrderDetails(data.data);
+                } else {
+                    alert('加载订单详情失败: ' + data.message);
+                    window.location.href = '/purchases';
+                }
+            } catch (error) {
+                console.error('Error fetching order details:', error);
+                alert('网络错误，请稍后重试');
+                window.location.href = '/purchases';
+            }
+        };
+
+        // 初始化页面
+        loadOrderDetails();
+
+        // 打印按钮事件
+        document.getElementById('detail-print-btn').addEventListener('click', function () {
+            window.print();
+        });
+    });
+</script>
+{% endblock %}

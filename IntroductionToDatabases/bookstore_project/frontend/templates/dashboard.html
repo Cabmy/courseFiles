@@ -1,0 +1,481 @@
+{% extends 'layout.html' %}
+
+{% block title %}仪表盘 - 书店管理系统{% endblock %}
+
+{% block header %}系统概览{% endblock %}
+
+{% block content %}
+<!-- 数据卡片 -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-4">
+        <div class="card border-left-primary h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">今日销售额</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="today-sales">¥0.00</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-currency-yen fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card border-left-success h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">本月销售额</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="month-sales">¥0.00</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-calendar fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card border-left-info h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">库存图书数</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="book-count">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-book fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card border-left-warning h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">库存预警</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="warning-count">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-exclamation-triangle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 图表和数据表格行 -->
+<div class="row">
+    <!-- 销售趋势图 -->
+    <div class="col-xl-8 col-lg-7">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold">销售趋势</h6>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="chartPeriod"
+                        data-bs-toggle="dropdown">
+                        最近30天
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="chartPeriod">
+                        <li><a class="dropdown-item chart-period" href="#" data-period="7">最近7天</a></li>
+                        <li><a class="dropdown-item chart-period active" href="#" data-period="30">最近30天</a></li>
+                        <li><a class="dropdown-item chart-period" href="#" data-period="90">最近90天</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-area">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 库存预警列表 -->
+    <div class="col-xl-4 col-lg-5">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold">库存预警</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="lowStockTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>书名</th>
+                                <th>库存</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="low-stock-list">
+                            <tr>
+                                <td colspan="3" class="text-center">加载中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="/books" class="btn btn-sm btn-primary">查看所有图书</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 最近销售和最近采购 -->
+<div class="row">
+    <!-- 最近销售 -->
+    <div class="col-lg-6">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold">最近销售</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>书名</th>
+                                <th>数量</th>
+                                <th>金额</th>
+                                <th>时间</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-sales">
+                            <tr>
+                                <td colspan="4" class="text-center">加载中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="/sales" class="btn btn-sm btn-primary">查看所有销售</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 最近采购 -->
+    <div class="col-lg-6">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold">最近采购</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>订单号</th>
+                                <th>金额</th>
+                                <th>状态</th>
+                                <th>时间</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-purchases">
+                            <tr>
+                                <td colspan="4" class="text-center">加载中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="/purchases" class="btn btn-sm btn-primary">查看所有采购</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 获取token
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        // 设置请求头
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+
+        // 加载概览数据
+        const loadOverviewData = async () => {
+            try {
+                // 财务概览数据
+                const financialResponse = await fetch('/api/financial/summary?period=today', { headers });
+                const financialData = await financialResponse.json();
+                if (financialData.status === 'success') {
+                    document.getElementById('today-sales').textContent = `¥${financialData.data.sale_income.toFixed(2)}`;
+                }
+
+                // 本月销售数据
+                const monthlyResponse = await fetch('/api/financial/summary?period=month', { headers });
+                const monthlyData = await monthlyResponse.json();
+                if (monthlyData.status === 'success') {
+                    document.getElementById('month-sales').textContent = `¥${monthlyData.data.sale_income.toFixed(2)}`;
+                }
+
+                // 图书总数
+                const booksResponse = await fetch('/api/books?per_page=1', { headers });
+                const booksData = await booksResponse.json();
+                if (booksData.status === 'success') {
+                    document.getElementById('book-count').textContent = booksData.data.meta.total;
+                }
+
+                // 库存预警数量
+                const lowStockResponse = await fetch('/api/books/low-stock', { headers });
+                const lowStockData = await lowStockResponse.json();
+                if (lowStockData.status === 'success') {
+                    document.getElementById('warning-count').textContent = lowStockData.data.length;
+                    renderLowStockList(lowStockData.data);
+                }
+            } catch (error) {
+                console.error('Error loading overview data:', error);
+            }
+        };
+
+        // 渲染库存预警列表
+        const renderLowStockList = (lowStockBooks) => {
+            const lowStockList = document.getElementById('low-stock-list');
+
+            if (lowStockBooks.length === 0) {
+                lowStockList.innerHTML = '<tr><td colspan="3" class="text-center">没有库存预警</td></tr>';
+                return;
+            }
+
+            lowStockList.innerHTML = '';
+            // 最多显示5条
+            const displayBooks = lowStockBooks.slice(0, 5);
+            displayBooks.forEach(book => {
+                lowStockList.innerHTML += `
+                <tr>
+                    <td>${book.title}</td>
+                    <td><span class="badge bg-warning text-dark">${book.stock}</span></td>
+                    <td>
+                        <a href="/books/edit/${book.book_id}" class="btn btn-sm btn-primary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                    </td>
+                </tr>
+            `;
+            });
+        };
+
+        // 加载最近销售
+        const loadRecentSales = async () => {
+            try {
+                const salesResponse = await fetch('/api/sales/records?per_page=5', { headers });
+                const salesData = await salesResponse.json();
+
+                const recentSales = document.getElementById('recent-sales');
+
+                if (salesData.status === 'success' && salesData.data.items.length > 0) {
+                    recentSales.innerHTML = '';
+                    salesData.data.items.forEach(sale => {
+                        recentSales.innerHTML += `
+                        <tr>
+                            <td>${sale.book_title}</td>
+                            <td>${sale.quantity}</td>
+                            <td>¥${sale.total_amount.toFixed(2)}</td>
+                            <td>${new Date(sale.sale_time).toLocaleDateString()}</td>
+                        </tr>
+                    `;
+                    });
+                } else {
+                    recentSales.innerHTML = '<tr><td colspan="4" class="text-center">暂无销售记录</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading recent sales:', error);
+                document.getElementById('recent-sales').innerHTML =
+                    '<tr><td colspan="4" class="text-center text-danger">加载失败，请稍后重试</td></tr>';
+            }
+        };
+
+        // 加载最近采购
+        const loadRecentPurchases = async () => {
+            try {
+                const purchasesResponse = await fetch('/api/purchases/orders?per_page=5', { headers });
+                const purchasesData = await purchasesResponse.json();
+
+                const recentPurchases = document.getElementById('recent-purchases');
+
+                if (purchasesData.status === 'success' && purchasesData.data.items.length > 0) {
+                    recentPurchases.innerHTML = '';
+                    purchasesData.data.items.forEach(order => {
+                        // 状态标签样式
+                        let statusClass = '';
+                        switch (order.status) {
+                            case '未付款':
+                                statusClass = 'bg-warning text-dark';
+                                break;
+                            case '已付款':
+                                statusClass = 'bg-success';
+                                break;
+                            case '已退货':
+                                statusClass = 'bg-danger';
+                                break;
+                        }
+
+                        recentPurchases.innerHTML += `
+                        <tr>
+                            <td><a href="/purchases/detail/${order.order_id}">${order.order_id}</a></td>
+                            <td>¥${order.total_amount.toFixed(2)}</td>
+                            <td><span class="badge ${statusClass}">${order.status}</span></td>
+                            <td>${new Date(order.create_time).toLocaleDateString()}</td>
+                        </tr>
+                    `;
+                    });
+                } else {
+                    recentPurchases.innerHTML = '<tr><td colspan="4" class="text-center">暂无采购记录</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading recent purchases:', error);
+                document.getElementById('recent-purchases').innerHTML =
+                    '<tr><td colspan="4" class="text-center text-danger">加载失败，请稍后重试</td></tr>';
+            }
+        };
+
+        // 初始化销售趋势图表
+        const initSalesChart = (days = 30) => {
+            fetch(`/api/financial/summary-trends?days=${days}`, { headers })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.status === 'success') {
+                        const ctx = document.getElementById('salesChart');
+
+                        // 销毁旧图表
+                        if (window.salesChart) {
+                            window.salesChart.destroy();
+                        }
+
+                        // 创建新图表
+                        window.salesChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: result.data.dates,
+                                datasets: [
+                                    {
+                                        label: '收入',
+                                        data: result.data.income,
+                                        backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                                        borderColor: 'rgba(78, 115, 223, 1)',
+                                        pointRadius: 3,
+                                        pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+                                        pointBorderColor: 'rgba(78, 115, 223, 1)',
+                                        pointHoverRadius: 5,
+                                        pointHoverBackgroundColor: 'rgba(78, 115, 223, 1)',
+                                        pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
+                                        lineTension: 0.3,
+                                        fill: true
+                                    },
+                                    {
+                                        label: '支出',
+                                        data: result.data.expense,
+                                        backgroundColor: 'rgba(231, 74, 59, 0.05)',
+                                        borderColor: 'rgba(231, 74, 59, 1)',
+                                        pointRadius: 3,
+                                        pointBackgroundColor: 'rgba(231, 74, 59, 1)',
+                                        pointBorderColor: 'rgba(231, 74, 59, 1)',
+                                        pointHoverRadius: 5,
+                                        pointHoverBackgroundColor: 'rgba(231, 74, 59, 1)',
+                                        pointHoverBorderColor: 'rgba(231, 74, 59, 1)',
+                                        lineTension: 0.3,
+                                        fill: true
+                                    }
+                                ]
+                            },
+                            options: {
+                                maintainAspectRatio: false,
+                                layout: {
+                                    padding: {
+                                        left: 10,
+                                        right: 25,
+                                        top: 25,
+                                        bottom: 0
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        grid: {
+                                            display: false
+                                        }
+                                    },
+                                    y: {
+                                        ticks: {
+                                            maxTicksLimit: 5,
+                                            padding: 10,
+                                            callback: function (value) {
+                                                return '¥' + value;
+                                            }
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function (context) {
+                                                let label = context.dataset.label || '';
+                                                if (label) {
+                                                    label += ': ';
+                                                }
+                                                if (context.parsed.y !== null) {
+                                                    label += '¥' + context.parsed.y.toFixed(2);
+                                                }
+                                                return label;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        console.error('加载销售趋势数据失败:', result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading sales trend data:', error);
+                });
+        };
+
+        // 切换图表周期事件
+        document.querySelectorAll('.chart-period').forEach(item => {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // 更新活动样式
+                document.querySelectorAll('.chart-period').forEach(el => {
+                    el.classList.remove('active');
+                });
+                this.classList.add('active');
+
+                // 更新下拉按钮文本
+                const days = parseInt(this.getAttribute('data-period'));
+                document.getElementById('chartPeriod').textContent = `最近${days}天`;
+
+                // 重新加载图表
+                initSalesChart(days);
+            });
+        });
+
+        // 初始化加载数据
+        loadOverviewData();
+        loadRecentSales();
+        loadRecentPurchases();
+        initSalesChart();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,215 @@
+{% extends 'layout.html' %}
+
+{% block title %}图书管理 - 书店管理系统{% endblock %}
+
+{% block header %}图书管理{% endblock %}
+
+{% block header_buttons %}
+<div>
+    <a href="/books/add" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> 添加新书
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- 搜索和筛选 -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold">搜索</h6>
+    </div>
+    <div class="card-body">
+        <form id="search-form">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="title" class="form-label">书名</label>
+                    <input type="text" class="form-control" id="title" name="title">
+                </div>
+                <div class="col-md-4">
+                    <label for="author" class="form-label">作者</label>
+                    <input type="text" class="form-control" id="author" name="author">
+                </div>
+                <div class="col-md-4">
+                    <label for="isbn" class="form-label">ISBN</label>
+                    <input type="text" class="form-control" id="isbn" name="isbn">
+                </div>
+                <div class="col-md-3">
+                    <label for="category" class="form-label">分类</label>
+                    <select class="form-select" id="category" name="category">
+                        <option value="">全部</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="publisher" class="form-label">出版社</label>
+                    <select class="form-select" id="publisher" name="publisher">
+                        <option value="">全部</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="stock_status" class="form-label">库存状态</label>
+                    <select class="form-select" id="stock_status" name="stock_status">
+                        <option value="">全部</option>
+                        <option value="normal">正常</option>
+                        <option value="low">库存不足</option>
+                        <option value="out">缺货</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="sort" class="form-label">排序方式</label>
+                    <select class="form-select" id="sort" name="sort">
+                        <option value="title:asc">书名 (A-Z)</option>
+                        <option value="title:desc">书名 (Z-A)</option>
+                        <option value="price:asc">价格 (低-高)</option>
+                        <option value="price:desc">价格 (高-低)</option>
+                        <option value="stock:asc">库存 (低-高)</option>
+                        <option value="stock:desc">库存 (高-低)</option>
+                    </select>
+                </div>
+                <div class="col-12 mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> 搜索
+                    </button>
+                    <button type="reset" class="btn btn-secondary">
+                        <i class="bi bi-arrow-clockwise"></i> 重置
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 图书列表 -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold">图书列表</h6>
+        <div>
+            <button class="btn btn-sm btn-outline-secondary" id="exportBtn">
+                <i class="bi bi-download"></i> 导出
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>ISBN</th>
+                        <th>书名</th>
+                        <th>作者</th>
+                        <th>分类</th>
+                        <th>价格</th>
+                        <th>库存</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="books-list">
+                    <tr>
+                        <td colspan="7" class="text-center">加载中...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 无数据提示 -->
+        <div id="no-data-message" class="text-center py-5" style="display: none;">
+            <i class="bi bi-inbox-fill" style="font-size: 3rem;"></i>
+            <h5 class="mt-3">没有找到符合条件的图书</h5>
+            <p class="text-muted">尝试修改搜索条件或添加新书</p>
+            <a href="/books/add" class="btn btn-primary mt-2">
+                <i class="bi bi-plus-circle"></i> 添加新书
+            </a>
+        </div>
+
+        <!-- 加载中提示 -->
+        <div id="loading-indicator" class="text-center py-5" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">加载中...</span>
+            </div>
+            <p class="mt-2">正在加载数据，请稍候...</p>
+        </div>
+
+        <!-- 分页 -->
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center" id="pagination">
+                <!-- 分页链接将动态生成 -->
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- 删除图书确认对话框 -->
+<div class="modal fade" id="deleteBookModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">确认删除</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>确定要删除《<span id="delete-book-title"></span>》吗？此操作无法撤销。</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete">确认删除</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 库存调整对话框 -->
+<div class="modal fade" id="adjustStockModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">调整库存</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="adjust-stock-form">
+                    <div class="mb-3">
+                        <label for="book-title" class="form-label">书名</label>
+                        <input type="text" class="form-control" id="adjust-book-title" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="current-stock" class="form-label">当前库存</label>
+                        <input type="number" class="form-control" id="current-stock" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="adjust-type" class="form-label">调整类型</label>
+                        <select class="form-select" id="adjust-type">
+                            <option value="add">增加</option>
+                            <option value="subtract">减少</option>
+                            <option value="set">设置为</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="adjust-quantity" class="form-label">数量</label>
+                        <input type="number" class="form-control" id="adjust-quantity" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="adjust-reason" class="form-label">调整原因</label>
+                        <select class="form-select" id="adjust-reason">
+                            <option value="盘点差异">盘点差异</option>
+                            <option value="损坏报废">损坏报废</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="adjust-notes" class="form-label">备注</label>
+                        <textarea class="form-control" id="adjust-notes" rows="2"></textarea>
+                    </div>
+                </form>
+                <div class="alert alert-danger" id="adjust-error" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="confirm-adjust">确认调整</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/book.js"></script>
+{% endblock %}

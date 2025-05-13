@@ -1,0 +1,474 @@
+{% extends 'layout.html' %}
+
+{% block title %}财务概览 - 书店管理系统{% endblock %}
+
+{% block header %}财务概览{% endblock %}
+
+{% block header_buttons %}
+<div>
+    <a href="/financial/records" class="btn btn-secondary">
+        <i class="bi bi-list-ul"></i> 财务记录
+    </a>
+    <button class="btn btn-outline-secondary" id="print-btn">
+        <i class="bi bi-printer"></i> 打印报表
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- 日期选择器 -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold">时间范围</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="btn-group mb-3">
+                    <button type="button" class="btn btn-outline-primary active period-btn"
+                        data-period="today">今日</button>
+                    <button type="button" class="btn btn-outline-primary period-btn" data-period="week">本周</button>
+                    <button type="button" class="btn btn-outline-primary period-btn" data-period="month">本月</button>
+                    <button type="button" class="btn btn-outline-primary period-btn" data-period="year">本年</button>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <form id="date-range-form" class="row g-3">
+                    <div class="col-md-5">
+                        <input type="date" class="form-control" id="start-date" name="start_date">
+                    </div>
+                    <div class="col-md-5">
+                        <input type="date" class="form-control" id="end-date" name="end_date">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary">筛选</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 财务摘要卡片 -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">总收入</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="total-income">¥0.00</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-currency-yen fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-danger h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">总支出</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="total-expense">¥0.00</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-credit-card fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">净利润</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="net-profit">¥0.00</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-graph-up fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">利润率</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="profit-rate">0%</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-percent fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 收入支出明细 -->
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold">收入明细</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td>销售收入</td>
+                                <td class="text-end" id="sale-income">¥0.00</td>
+                            </tr>
+                            <tr>
+                                <td>其他收入</td>
+                                <td class="text-end" id="other-income">¥0.00</td>
+                            </tr>
+                            <tr class="fw-bold">
+                                <td>总计</td>
+                                <td class="text-end" id="income-total">¥0.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold">支出明细</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td>采购支出</td>
+                                <td class="text-end" id="purchase-expense">¥0.00</td>
+                            </tr>
+                            <tr>
+                                <td>其他支出</td>
+                                <td class="text-end" id="other-expense">¥0.00</td>
+                            </tr>
+                            <tr class="fw-bold">
+                                <td>总计</td>
+                                <td class="text-end" id="expense-total">¥0.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 财务趋势图表 -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold">财务趋势</h6>
+        <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="chartPeriod"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                最近30天
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="chartPeriod">
+                <li><a class="dropdown-item chart-period" href="#" data-period="7">最近7天</a></li>
+                <li><a class="dropdown-item chart-period active" href="#" data-period="30">最近30天</a></li>
+                <li><a class="dropdown-item chart-period" href="#" data-period="90">最近90天</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="chart-area">
+            <canvas id="financialChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 获取token
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        // 设置请求头
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+
+        // 当前选择的时间范围
+        let currentPeriod = 'today';
+        let startDate = null;
+        let endDate = null;
+
+        // 加载财务概览数据
+        const loadFinancialOverview = (period = 'today', start = null, end = null) => {
+            let url = `/api/financial/summary?period=${period}`;
+            if (period === 'custom' && start && end) {
+                url = `/api/financial/summary?period=custom&start_date=${start}&end_date=${end}`;
+            }
+
+            fetch(url, { headers })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.status === 'success') {
+                        const data = result.data;
+
+                        // 更新摘要卡片
+                        document.getElementById('total-income').textContent = `¥${data.total_income.toFixed(2)}`;
+                        document.getElementById('total-expense').textContent = `¥${data.total_expense.toFixed(2)}`;
+                        document.getElementById('net-profit').textContent = `¥${data.net_profit.toFixed(2)}`;
+
+                        // 计算利润率
+                        const profitRate = data.total_income > 0 ?
+                            (data.net_profit / data.total_income * 100) : 0;
+                        document.getElementById('profit-rate').textContent = `${profitRate.toFixed(2)}%`;
+
+                        // 更新收入明细
+                        document.getElementById('sale-income').textContent = `¥${data.sale_income.toFixed(2)}`;
+                        document.getElementById('other-income').textContent = `¥${data.other_income.toFixed(2)}`;
+                        document.getElementById('income-total').textContent = `¥${data.total_income.toFixed(2)}`;
+
+                        // 更新支出明细
+                        document.getElementById('purchase-expense').textContent = `¥${data.purchase_expense.toFixed(2)}`;
+                        document.getElementById('other-expense').textContent = `¥${data.other_expense.toFixed(2)}`;
+                        document.getElementById('expense-total').textContent = `¥${data.total_expense.toFixed(2)}`;
+                    } else {
+                        console.error('加载财务概览失败:', result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        };
+
+        // 初始化财务趋势图表
+        const initFinancialChart = (days = 30) => {
+            fetch(`/api/financial/summary-trends?days=${days}`, { headers })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.status === 'success') {
+                        const ctx = document.getElementById('financialChart');
+
+                        // 销毁旧图表
+                        if (window.financialChart) {
+                            window.financialChart.destroy();
+                        }
+
+                        // 创建新图表
+                        window.financialChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: result.data.dates,
+                                datasets: [
+                                    {
+                                        label: '收入',
+                                        backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                                        borderColor: 'rgba(78, 115, 223, 1)',
+                                        pointRadius: 3,
+                                        pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+                                        pointBorderColor: 'rgba(78, 115, 223, 1)',
+                                        pointHoverRadius: 3,
+                                        pointHoverBackgroundColor: 'rgba(78, 115, 223, 1)',
+                                        pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
+                                        pointHitRadius: 10,
+                                        pointBorderWidth: 2,
+                                        data: result.data.income
+                                    },
+                                    {
+                                        label: '支出',
+                                        backgroundColor: 'rgba(231, 74, 59, 0.05)',
+                                        borderColor: 'rgba(231, 74, 59, 1)',
+                                        pointRadius: 3,
+                                        pointBackgroundColor: 'rgba(231, 74, 59, 1)',
+                                        pointBorderColor: 'rgba(231, 74, 59, 1)',
+                                        pointHoverRadius: 3,
+                                        pointHoverBackgroundColor: 'rgba(231, 74, 59, 1)',
+                                        pointHoverBorderColor: 'rgba(231, 74, 59, 1)',
+                                        pointHitRadius: 10,
+                                        pointBorderWidth: 2,
+                                        data: result.data.expense
+                                    }
+                                ]
+                            },
+                            options: {
+                                maintainAspectRatio: false,
+                                layout: {
+                                    padding: {
+                                        left: 10,
+                                        right: 25,
+                                        top: 25,
+                                        bottom: 0
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        time: {
+                                            unit: 'date'
+                                        },
+                                        grid: {
+                                            display: false,
+                                            drawBorder: false
+                                        },
+                                        ticks: {
+                                            maxTicksLimit: 7
+                                        }
+                                    },
+                                    y: {
+                                        ticks: {
+                                            maxTicksLimit: 5,
+                                            padding: 10,
+                                            callback: function (value) {
+                                                return '¥' + value;
+                                            }
+                                        },
+                                        grid: {
+                                            color: "rgb(234, 236, 244)",
+                                            zeroLineColor: "rgb(234, 236, 244)",
+                                            drawBorder: false,
+                                            borderDash: [2],
+                                            zeroLineBorderDash: [2]
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    legend: {
+                                        display: true
+                                    },
+                                    tooltip: {
+                                        backgroundColor: "rgb(255,255,255)",
+                                        bodyColor: "#858796",
+                                        titleMarginBottom: 10,
+                                        titleColor: '#6e707e',
+                                        titleFontSize: 14,
+                                        borderColor: '#dddfeb',
+                                        borderWidth: 1,
+                                        xPadding: 15,
+                                        yPadding: 15,
+                                        displayColors: false,
+                                        intersect: false,
+                                        mode: 'index',
+                                        caretPadding: 10,
+                                        callbacks: {
+                                            label: function (context) {
+                                                var label = context.dataset.label || '';
+                                                if (label) {
+                                                    label += ': ';
+                                                }
+                                                if (context.parsed.y !== null) {
+                                                    label += '¥' + context.parsed.y.toFixed(2);
+                                                }
+                                                return label;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading chart data:', error);
+                });
+        };
+
+        // 绑定时间范围按钮点击事件
+        document.querySelectorAll('.period-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                // 更新按钮样式
+                document.querySelectorAll('.period-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+
+                // 获取选择的时间范围
+                currentPeriod = this.getAttribute('data-period');
+
+                // 重置自定义日期输入
+                if (currentPeriod !== 'custom') {
+                    document.getElementById('start-date').value = '';
+                    document.getElementById('end-date').value = '';
+                    startDate = null;
+                    endDate = null;
+                }
+
+                // 加载数据
+                loadFinancialOverview(currentPeriod);
+            });
+        });
+
+        // 绑定自定义日期表单提交事件
+        document.getElementById('date-range-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // 获取自定义日期
+            startDate = document.getElementById('start-date').value;
+            endDate = document.getElementById('end-date').value;
+
+            if (!startDate || !endDate) {
+                alert('请选择开始和结束日期');
+                return;
+            }
+
+            // 更新按钮样式
+            document.querySelectorAll('.period-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // 设置为自定义时间范围
+            currentPeriod = 'custom';
+
+            // 加载数据
+            loadFinancialOverview(currentPeriod, startDate, endDate);
+        });
+
+        // 绑定图表周期选择事件
+        document.querySelectorAll('.chart-period').forEach(item => {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // 更新活动样式
+                document.querySelectorAll('.chart-period').forEach(el => {
+                    el.classList.remove('active');
+                });
+                this.classList.add('active');
+
+                // 更新下拉按钮文本
+                const days = parseInt(this.getAttribute('data-period'));
+                document.getElementById('chartPeriod').textContent = `最近${days}天`;
+
+                // 重新加载图表
+                initFinancialChart(days);
+            });
+        });
+
+        // 绑定打印按钮事件
+        document.getElementById('print-btn').addEventListener('click', function () {
+            window.print();
+        });
+
+        // 初始化加载数据
+        loadFinancialOverview();
+        initFinancialChart();
+    });
+</script>
+{% endblock %}
