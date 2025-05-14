@@ -254,7 +254,7 @@ def update_purchase_order(order_id):
         db.session.rollback()
         return jsonify({'error': f'更新进货单失败: {str(e)}'}), 500
 
-# 取消进货单（改为已取消状态）
+# 取消进货单（改为已退货状态）
 @purchase_bp.route('/<int:order_id>/cancel', methods=['POST'])
 @login_required
 def cancel_purchase_order(order_id):
@@ -264,16 +264,16 @@ def cancel_purchase_order(order_id):
         return jsonify({'error': '进货单不存在'}), 404
     
     if order.status == '已付款':
-        return jsonify({'error': '已付款的进货单不能取消'}), 400
+        return jsonify({'error': '已付款的进货单不能退货'}), 400
     
-    order.status = '已取消'
+    order.status = '已退货'
     
     try:
         db.session.commit()
         return jsonify({
-            'message': '进货单已取消',
+            'message': '进货单已退货',
             'order': order.to_dict()
         })
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': f'取消进货单失败: {str(e)}'}), 500
+        return jsonify({'error': f'退货失败: {str(e)}'}), 500

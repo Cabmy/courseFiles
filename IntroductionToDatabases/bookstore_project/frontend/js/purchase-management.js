@@ -119,10 +119,9 @@ const PurchaseManagement = {
                                 <button class="btn btn-sm btn-outline-success action-btn" 
                                         onclick="PurchaseManagement.payOrder(${order.order_id})">
                                     付款
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger action-btn" 
+                                </button>                                <button class="btn btn-sm btn-outline-danger action-btn" 
                                         onclick="PurchaseManagement.cancelOrder(${order.order_id})">
-                                    取消
+                                    退货
                                 </button>
                                 ` : ''}
                                 ${order.status === '已付款' && order.details.some(detail => detail.is_new_book) ? `
@@ -406,22 +405,20 @@ const PurchaseManagement = {
         } catch (error) {
             alert('支付进货单失败: ' + error.message);
         }
-    },
-
-    // 取消进货单
+    },    // 取消进货单
     async cancelOrder(orderId) {
-        if (!confirm('确定要取消此进货单吗？此操作不可撤销。')) {
+        if (!confirm('确定要退货此进货单吗？此操作不可撤销。')) {
             return;
         }
 
         try {
             await API.purchase.cancelPurchase(orderId);
-            alert('进货单已取消');
+            alert('进货单已退货');
 
             // 重新加载进货单列表
             this.loadOrders();
         } catch (error) {
-            alert('取消进货单失败: ' + error.message);
+            alert('退货失败: ' + error.message);
         }
     },
 
