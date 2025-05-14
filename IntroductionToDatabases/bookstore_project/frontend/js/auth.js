@@ -1,14 +1,20 @@
 // 认证管理模块
 const Auth = {
-    currentUser: null,
-
-    // 初始化认证状态
+    currentUser: null,    // 初始化认证状态
     async init() {
         // 检查是否已登录
         try {
             const response = await API.auth.getCurrentUser();
             this.currentUser = response.user;
             this.updateUI();
+
+            // 确保进货管理模块已初始化
+            if (typeof PurchaseManagement !== 'undefined' && !PurchaseManagement.eventsBound) {
+                console.log('预先初始化进货管理模块');
+                PurchaseManagement.bindEvents();
+                PurchaseManagement.eventsBound = true;
+                PurchaseManagement.loadBooks();
+            }
 
             // 显示仪表盘
             UI.showPage('dashboard');
@@ -23,14 +29,20 @@ const Auth = {
             UI.showLoginPage();
             return false;
         }
-    },
-
-    // 用户登录
+    },    // 用户登录
     async login(username, password) {
         try {
             const response = await API.auth.login(username, password);
             this.currentUser = response.user;
             this.updateUI();
+
+            // 确保进货管理模块已初始化
+            if (typeof PurchaseManagement !== 'undefined' && !PurchaseManagement.eventsBound) {
+                console.log('预先初始化进货管理模块');
+                PurchaseManagement.bindEvents();
+                PurchaseManagement.eventsBound = true;
+                PurchaseManagement.loadBooks();
+            }
 
             // 显示仪表盘
             UI.showPage('dashboard');

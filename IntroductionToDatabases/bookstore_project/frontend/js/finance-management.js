@@ -1,8 +1,14 @@
 // 财务管理功能模块
 const FinanceManagement = {
+    // 是否已初始化事件
+    eventsBound: false,
+
     // 初始化
     init() {
-        this.bindEvents();
+        if (!this.eventsBound) {
+            this.bindEvents();
+            this.eventsBound = true;
+        }
         this.loadFinancialSummary();
         this.loadFinancialRecords();
         this.loadMonthlyStatistics();

@@ -190,9 +190,7 @@ const Dashboard = {
             const lowStockBooks = response.books;
 
             const tableBody = document.getElementById('low-stock-list');
-            tableBody.innerHTML = '';
-
-            if (lowStockBooks.length > 0) {
+            tableBody.innerHTML = ''; if (lowStockBooks.length > 0) {
                 lowStockBooks.forEach(book => {
                     tableBody.innerHTML += `
                         <tr>
@@ -203,8 +201,8 @@ const Dashboard = {
                                 </span>
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary"
-                                    onclick="PurchaseManagement.quickCreatePurchase(${book.book_id})">
+                                <button class="btn btn-sm btn-outline-primary quick-purchase-btn" 
+                                    data-book-id="${book.book_id}">
                                     快速进货
                                 </button>
                             </td>
@@ -224,10 +222,15 @@ const Dashboard = {
 // 图书管理模块
 const BookManagement = {
     books: [],
+    // 是否已初始化事件
+    eventsBound: false,
 
     // 初始化
     init() {
-        this.bindEvents();
+        if (!this.eventsBound) {
+            this.bindEvents();
+            this.eventsBound = true;
+        }
         this.loadBooks();
     },
 
@@ -321,10 +324,17 @@ const BookManagement = {
     searchBooks() {
         const searchQuery = document.getElementById('book-search').value.trim();
         this.loadBooks(searchQuery);
-    },
+    },    // 防重复提交标志
+    isSubmittingBook: false,
 
     // 添加新图书
     async addBook() {
+        // 防止重复提交
+        if (this.isSubmittingBook) {
+            console.log('正在处理上一次提交，请勿重复操作');
+            return;
+        }
+
         const bookData = {
             isbn: document.getElementById('isbn').value,
             title: document.getElementById('title').value,
@@ -335,6 +345,15 @@ const BookManagement = {
         };
 
         try {
+            this.isSubmittingBook = true;
+
+            // 禁用提交按钮
+            const submitBtn = document.querySelector('#addBookModal .btn-primary');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 处理中...';
+            }
+
             await API.book.createBook(bookData);
             alert('图书添加成功');
 
@@ -348,6 +367,16 @@ const BookManagement = {
             this.loadBooks();
         } catch (error) {
             alert('添加图书失败: ' + error.message);
+        } finally {
+            // 无论成功或失败，都重置提交状态
+            this.isSubmittingBook = false;
+
+            // 恢复按钮状态
+            const submitBtn = document.querySelector('#addBookModal .btn-primary');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '保存';
+            }
         }
     },
 

@@ -3,9 +3,15 @@ const SaleManagement = {
     books: [],
     sales: [],
 
+    // 标记是否已初始化
+    initialized: false,
+
     // 初始化
     init() {
-        this.bindEvents();
+        if (!this.initialized) {
+            this.bindEvents();
+            this.initialized = true;
+        }
         this.loadSales();
         this.loadBooks(); // 用于销售图书选择
     },
@@ -163,10 +169,17 @@ const SaleManagement = {
         // 显示模态框
         const modal = new bootstrap.Modal(document.getElementById('addSaleModal'));
         modal.show();
-    },
+    },    // 防重复提交标志
+    isSubmitting: false,
 
     // 添加销售记录
     async addSale() {
+        // 防止重复提交
+        if (this.isSubmitting) {
+            console.log('正在处理上一次提交，请勿重复操作');
+            return;
+        }
+
         const saleData = {
             book_id: parseInt(document.getElementById('sale-book-id').value),
             quantity: parseInt(document.getElementById('sale-quantity').value),
@@ -191,6 +204,15 @@ const SaleManagement = {
         }
 
         try {
+            this.isSubmitting = true;
+
+            // 禁用提交按钮
+            const submitBtn = document.querySelector('#addSaleModal .btn-primary');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 处理中...';
+            }
+
             await API.sale.createSale(saleData);
             alert('销售记录添加成功');
 
@@ -205,6 +227,16 @@ const SaleManagement = {
             Dashboard.loadData();
         } catch (error) {
             alert('添加销售记录失败: ' + error.message);
+        } finally {
+            // 无论成功或失败，都重置提交状态
+            this.isSubmitting = false;
+
+            // 恢复按钮状态
+            const submitBtn = document.querySelector('#addSaleModal .btn-primary');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '保存';
+            }
         }
     },
 
