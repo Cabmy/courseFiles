@@ -510,20 +510,15 @@ const PurchaseManagement = {
             console.error('显示新书列表失败:', error);
             alert('显示新书列表失败: ' + error.message);
         }
-    },
-
-    // 从仪表盘快速创建进货单
+    },    // 从仪表盘快速创建进货单
     quickCreatePurchase(bookId) {
         try {
-            console.log(`开始快速进货处理，图书ID: ${bookId}`);
-
             // 确保先初始化进货管理模块
             if (!this.eventsBound) {
-                console.log('进货管理模块尚未初始化，先进行初始化');
                 this.bindEvents();
                 this.eventsBound = true;
-                this.loadBooks().catch(err => {
-                    console.error('加载图书列表失败:', err);
+                this.loadBooks().catch(() => {
+                    // 静默处理错误
                 });
             }
 
@@ -533,7 +528,6 @@ const PurchaseManagement = {
             // 给系统一点时间来加载页面和数据
             setTimeout(() => {
                 // 打开创建进货单对话框
-                console.log('打开进货单创建对话框');
                 this.openCreateOrderDialog();
 
                 // 再等待一段时间，确保对话框已打开且图书列表加载完成
@@ -550,31 +544,23 @@ const PurchaseManagement = {
                     if (bookSelect) {
                         // 设置所选图书
                         bookSelect.value = bookId;
-                        console.log(`已选择图书ID: ${bookId}`);
 
                         // 触发图书选择变更事件
                         bookSelect.dispatchEvent(new Event('change'));
 
                         // 设置默认数量为10
                         document.getElementById('detail-quantity').value = 10;
-                        console.log('已设置默认数量: 10');
 
                         // 添加到明细
                         const addBtn = document.getElementById('add-detail-item-btn');
                         if (addBtn) {
                             addBtn.click();
-                            console.log('已添加至明细项');
-                        } else {
-                            console.error('未找到添加明细按钮');
                         }
-                    } else {
-                        console.error('图书选择框未找到');
                     }
                 }, 300);
             }, 500);
         } catch (error) {
-            console.error('快速创建进货单失败:', error);
-            alert('快速创建进货单失败: ' + error.message);
+            alert('快速创建进货单失败');
         }
     }
 };
