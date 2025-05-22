@@ -77,7 +77,6 @@
 
 1. **安装依赖**
    ```bash
-   cd backend
    pip install -r requirements.txt
    ```
 
@@ -150,6 +149,7 @@ backend/
     requirements.txt        # 依赖管理
     routes/                 # API路由模块
         book_routes.py      # 图书管理路由
+        dashboard_routes.py # 控制台路由
         finance_routes.py   # 财务管理路由
         purchase_routes.py  # 进货管理路由
         sale_routes.py      # 销售管理路由
@@ -166,6 +166,8 @@ frontend/
         auth.js             # 认证模块
         config.js           # 配置文件
         finance-management.js  # 财务管理模块
+        patch.js            # 系统补丁脚本
+        purchase-fixes.js   # 进货模块综合修复脚本
         purchase-management.js # 进货管理模块
         sale-management.js     # 销售管理模块
         script.js           # 主脚本文件

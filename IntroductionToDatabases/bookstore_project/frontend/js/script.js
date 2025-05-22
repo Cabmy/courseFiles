@@ -142,7 +142,6 @@ const Dashboard = {
             // 加载库存预警
             await this.loadLowStockBooks();
         } catch (error) {
-            console.error('加载仪表盘数据失败:', error);
             alert('加载仪表盘数据失败: ' + error.message);
         }
     },
@@ -175,12 +174,9 @@ const Dashboard = {
                 tableBody.innerHTML = '<tr><td colspan="3" class="text-center">暂无销售数据</td></tr>';
             }
         } catch (error) {
-            console.error('加载销售排行失败:', error);
             UI.showError('sales-ranking', '加载销售排行失败: ' + error.message);
         }
-    },
-
-    // 加载库存预警
+    },    // 加载库存预警
     async loadLowStockBooks() {
         try {
             // 显示加载状态
@@ -202,7 +198,7 @@ const Dashboard = {
                             </td>
                             <td>
                                 <button class="btn btn-sm btn-outline-primary quick-purchase-btn" 
-                                    data-book-id="${book.book_id}">
+                                    data-book-id="${book.book_id}" onclick="event.preventDefault();">
                                     快速进货
                                 </button>
                             </td>
@@ -213,7 +209,6 @@ const Dashboard = {
                 tableBody.innerHTML = '<tr><td colspan="3" class="text-center">没有库存预警</td></tr>';
             }
         } catch (error) {
-            console.error('加载库存预警失败:', error);
             UI.showError('low-stock-list', '加载库存预警失败: ' + error.message);
         }
     }
@@ -304,7 +299,6 @@ const BookManagement = {
                 `;
             }
         } catch (error) {
-            console.error('加载图书列表失败:', error);
             UI.showError('books-table-body', '加载图书列表失败: ' + error.message);
         }
     },
@@ -328,10 +322,8 @@ const BookManagement = {
     isSubmittingBook: false,
 
     // 添加新图书
-    async addBook() {
-        // 防止重复提交
+    async addBook() {        // 防止重复提交
         if (this.isSubmittingBook) {
-            console.log('正在处理上一次提交，请勿重复操作');
             return;
         }
 

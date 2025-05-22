@@ -5,7 +5,6 @@ const API = {
     // 通用请求方法
     async request(endpoint, options = {}) {
         const url = this.baseUrl + endpoint;
-        console.log('API请求URL:', url);
 
         // 默认选项
         const defaultOptions = {
@@ -25,8 +24,6 @@ const API = {
             }
         };
 
-        console.log('请求选项:', JSON.stringify(fetchOptions, null, 2));
-
         // 如果有请求体且为JSON格式，转换为字符串
         if (fetchOptions.body && typeof fetchOptions.body === 'object') {
             fetchOptions.body = JSON.stringify(fetchOptions.body);
@@ -34,30 +31,27 @@ const API = {
 
         try {
             const response = await fetch(url, fetchOptions);
-            console.log('API响应状态:', response.status, response.statusText);
 
             // 获取原始响应文本
             const responseText = await response.text();
-            console.log('API原始响应:', responseText);
 
             // 尝试解析为JSON
             let data;
             try {
                 data = JSON.parse(responseText);
             } catch (e) {
-                console.error('响应不是有效的JSON:', responseText);
+                console.error('响应不是有效的JSON格式');
                 throw new Error('服务器响应不是有效的JSON格式');
             }
 
             // 如果响应不成功，抛出详细错误
             if (!response.ok) {
-                console.error('API错误响应:', data);
                 throw new Error(data.error || `请求失败: ${response.status} ${response.statusText}`);
             }
 
             return data;
         } catch (error) {
-            console.error('API请求错误:', error);
+            console.error('API请求错误');
             throw error;
         }
     },
@@ -252,11 +246,9 @@ const API = {
             return API.request(`/purchases/${purchaseId}/cancel`, {
                 method: 'POST'
             });
-        },
-
-        // 添加新书到库存
+        },        // 添加新书到库存
         addNewBookToStock(detailId, retailPrice) {
-            return API.request(`/purchases/details/${detailId}/add-book`, {
+            return API.request(`/purchases/detail/${detailId}/add-to-stock`, {
                 method: 'POST',
                 body: { retail_price: retailPrice }
             });

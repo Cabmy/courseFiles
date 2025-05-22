@@ -379,9 +379,30 @@ const PurchaseManagement = {
                         <td colspan="9" class="text-center">无进货明细</td>
                     </tr>
                 `;
+            }            // 先检查是否有其他模态框打开
+            const newBooksModal = document.getElementById('newBooksModal');
+            const newBooksModalOpen = newBooksModal && newBooksModal.classList.contains('show');
+
+            // 如果新书模态框打开，先关闭它
+            if (newBooksModalOpen) {
+                try {
+                    const bsNewBooksModal = bootstrap.Modal.getInstance(newBooksModal);
+                    if (bsNewBooksModal) {
+                        bsNewBooksModal.hide();
+                        // 给UI时间关闭前一个模态框
+                        setTimeout(() => {
+                            // 然后再显示订单详情模态框
+                            const modal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
+                            modal.show();
+                        }, 300);
+                        return; // 提前返回，避免立即显示
+                    }
+                } catch (err) {
+                    console.error('关闭新书模态框失败:', err);
+                }
             }
 
-            // 显示模态框
+            // 如果没有其他模态框打开，直接显示
             const modal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
             modal.show();
         } catch (error) {
@@ -432,9 +453,7 @@ const PurchaseManagement = {
         // 显示模态框
         const modal = new bootstrap.Modal(document.getElementById('addToStockModal'));
         modal.show();
-    },
-
-    // 添加新书到库存
+    },    // 添加新书到库存
     async addNewBookToStock() {
         const detailId = document.getElementById('add-to-stock-detail-id').value;
         const retailPrice = parseFloat(document.getElementById('new-book-retail-price').value);
@@ -448,69 +467,140 @@ const PurchaseManagement = {
             await API.purchase.addNewBookToStock(detailId, retailPrice);
             alert('新书已成功添加到库存');
 
-            // 关闭模态框
-            bootstrap.Modal.getInstance(document.getElementById('addToStockModal')).hide();
+            // 只关闭添加库存的模态框，不关闭其他模态框
+            const addToStockModal = bootstrap.Modal.getInstance(document.getElementById('addToStockModal'));
+            if (addToStockModal) {
+                addToStockModal.hide();
+            }
 
-            // 关闭详情模态框
-            bootstrap.Modal.getInstance(document.getElementById('orderDetailModal')).hide();
+            // 清空零售价格输入框，为下一次添加做准备
+            document.getElementById('new-book-retail-price').value = '';
 
             // 重新加载进货单列表和图书列表
             this.loadOrders();
             this.loadBooks();
 
             // 更新仪表板数据
-            Dashboard.loadData();
+            Dashboard.loadData();            // 确定当前打开的是哪个对话框，只刷新一个，避免同时打开多个弹窗
+            const orderDetailId = document.getElementById('order-detail-id').textContent;
+            const currentOrderId = document.getElementById('current-order-id').value;
+            const orderDetailModalOpen = document.getElementById('orderDetailModal').classList.contains('show');
+            const newBooksModalOpen = document.getElementById('newBooksModal').classList.contains('show');
+
+            // 延迟执行刷新，确保前端UI状态已经更新
+            setTimeout(() => {
+                // 优先处理新书添加框
+                if (currentOrderId && newBooksModalOpen) {
+                    this.refreshNewBooksDialog(currentOrderId);
+                }
+                // 如果新书添加框没打开，但订单详情框打开了，则刷新订单详情
+                else if (orderDetailId && orderDetailModalOpen) {
+                    // 额外延迟，确保不会有重叠弹窗
+                    setTimeout(() => {
+                        this.showOrderDetails(orderDetailId);
+                    }, 100);
+                }
+            }, 300);
         } catch (error) {
             alert('添加新书到库存失败: ' + error.message);
         }
-    },
-
-    // 显示添加新书对话框
+    },    // 显示添加新书对话框
     showAddNewBooksDialog(orderId) {
         try {
-            const order = this.orders.find(o => o.order_id === orderId);
-            if (!order) return;
+            // 保存订单ID，用于后续刷新
+            document.getElementById('current-order-id').value = orderId;
 
-            const newBookDetails = order.details.filter(d => d.is_new_book);
+            // 检查订单详情模态框是否打开
+            const orderDetailModal = document.getElementById('orderDetailModal');
+            const orderDetailModalOpen = orderDetailModal && orderDetailModal.classList.contains('show');
 
-            const tableBody = document.getElementById('new-books-table-body');
-            tableBody.innerHTML = '';
-
-            if (newBookDetails.length > 0) {
-                newBookDetails.forEach(detail => {
-                    tableBody.innerHTML += `
-                        <tr>
-                            <td>${detail.title}</td>
-                            <td>${detail.author}</td>
-                            <td>${detail.publisher}</td>
-                            <td>${detail.isbn}</td>
-                            <td>${detail.quantity}</td>
-                            <td>${UI.formatCurrency(detail.purchase_price)}</td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary" 
-                                        onclick="PurchaseManagement.openAddToStockDialog(${detail.detail_id})">
-                                    添加到库存
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            } else {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="text-center">该进货单中没有新书</td>
-                    </tr>
-                `;
+            // 如果订单详情模态框是打开的，先关闭它
+            if (orderDetailModalOpen) {
+                try {
+                    const bsOrderDetailModal = bootstrap.Modal.getInstance(orderDetailModal);
+                    if (bsOrderDetailModal) {
+                        bsOrderDetailModal.hide();
+                        // 给UI时间关闭前一个模态框
+                        setTimeout(() => {
+                            this.refreshNewBooksDialog(orderId);
+                        }, 300);
+                        return; // 提前返回，避免立即显示
+                    }
+                } catch (err) {
+                    console.error('关闭订单详情模态框失败:', err);
+                }
             }
 
-            // 显示模态框
-            const modal = new bootstrap.Modal(document.getElementById('newBooksModal'));
-            modal.show();
+            // 如果没有其他模态框打开或关闭失败，直接显示
+            this.refreshNewBooksDialog(orderId);
         } catch (error) {
             console.error('显示新书列表失败:', error);
             alert('显示新书列表失败: ' + error.message);
         }
-    },    // 从仪表盘快速创建进货单
+    },
+
+    // 刷新"添加新书"对话框的内容
+    refreshNewBooksDialog(orderId) {
+        try {
+            // 先获取最新的订单数据
+            API.purchase.getPurchase(orderId).then(response => {
+                const order = response.order;
+                if (!order) return;
+
+                const newBookDetails = order.details.filter(d => d.is_new_book);
+
+                const tableBody = document.getElementById('new-books-table-body');
+                tableBody.innerHTML = '';
+
+                if (newBookDetails.length > 0) {
+                    newBookDetails.forEach(detail => {
+                        tableBody.innerHTML += `
+                            <tr>
+                                <td>${detail.title}</td>
+                                <td>${detail.author}</td>
+                                <td>${detail.publisher}</td>
+                                <td>${detail.isbn}</td>
+                                <td>${detail.quantity}</td>
+                                <td>${UI.formatCurrency(detail.purchase_price)}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" 
+                                            onclick="PurchaseManagement.openAddToStockDialog(${detail.detail_id})">
+                                        添加到库存
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center">该进货单中没有新书或所有新书已添加到库存</td>
+                        </tr>
+                    `;
+
+                    // 如果没有新书了，3秒后自动关闭对话框
+                    setTimeout(() => {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('newBooksModal'));
+                        if (modal) {
+                            modal.hide();
+                        }
+                    }, 3000);
+                }                // 确保模态框在页面中存在并且尚未打开
+                const newBooksModal = document.getElementById('newBooksModal');
+                if (newBooksModal && !newBooksModal.classList.contains('show')) {
+                    // 使用try-catch避免可能的Bootstrap模态框错误
+                    try {
+                        const modal = new bootstrap.Modal(newBooksModal);
+                        modal.show();
+                    } catch (err) {
+                        console.error('显示新书模态框失败:', err);
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('刷新新书列表失败:', error);
+        }
+    },// 从仪表盘快速创建进货单
     quickCreatePurchase(bookId) {
         try {
             // 确保先初始化进货管理模块
